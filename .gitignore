@@ -1,3 +1,4 @@
+.vscode
 # project specific stuff
 data/
 pkg/api/test-data/
