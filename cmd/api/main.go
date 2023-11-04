@@ -44,6 +44,9 @@ func main() {
 	if err := viper.Unmarshal(&srvCfg); err != nil {
 		logger.Panic("HTTP Server config unmarshal error", zap.Error(err))
 	}
-	srv, _ := api.NewServer(&srvCfg, logger)
+	srv, err := api.NewServer(&srvCfg, logger)
+	if err != nil {
+		logger.Panic("server_error", zap.Error(err))
+	}
 	srv.ListenAndServe()
 }
