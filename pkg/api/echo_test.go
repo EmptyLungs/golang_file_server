@@ -5,9 +5,12 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestEchohandler(t *testing.T) {
+	assert := assert.New(t)
 	cases := []struct {
 		url    string
 		method string
@@ -28,8 +31,6 @@ func TestEchohandler(t *testing.T) {
 		rr := httptest.NewRecorder()
 		handler.ServeHTTP(rr, req)
 
-		if status := rr.Code; status != c.status {
-			t.Errorf("hanlder return wrong status code: got %v want %v", status, c.status)
-		}
+		assert.Equal(rr.Code, c.status, "hanlder return wrong status code:\ngot %v want %v", rr.Code, c.status)
 	}
 }

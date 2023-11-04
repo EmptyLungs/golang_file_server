@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func mockRandomBytesFile(size int64, filename string) (*bytes.Buffer, string) {
@@ -22,6 +24,7 @@ func mockRandomBytesFile(size int64, filename string) (*bytes.Buffer, string) {
 }
 
 func TestUploadHandler(t *testing.T) {
+	assert := assert.New(t)
 	cases := []struct {
 		url      string
 		method   string
@@ -47,9 +50,6 @@ func TestUploadHandler(t *testing.T) {
 		}
 		rr := httptest.NewRecorder()
 		handler.ServeHTTP(rr, req)
-
-		if status := rr.Code; status != c.status {
-			t.Errorf("Hanlder return wrong status code:\nGot %v want %v\nResponse: %s", status, c.status, rr.Body.String())
-		}
+		assert.Equal(rr.Code, c.status, "Hanlder return wrong status code:\nGot %v want %v\nResponse: %s", rr.Code, c.status, rr.Body.String())
 	}
 }
