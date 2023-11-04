@@ -52,6 +52,14 @@ func (fm *FileManager) DeleteFile() error {
 	return nil
 }
 
-func (fm *FileManager) ListFiles() error {
-	return nil
+func (fm *FileManager) ListFiles() ([]string, error) {
+	var fileNames []string
+	files, err := os.ReadDir(fm.workDir)
+	if err != nil {
+		return nil, err
+	}
+	for _, e := range files {
+		fileNames = append(fileNames, e.Name())
+	}
+	return fileNames, nil
 }

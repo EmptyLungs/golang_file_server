@@ -28,6 +28,7 @@ type Server struct {
 func (s *Server) registerHandlers() {
 	s.router.HandleFunc("/echo", s.echoHandler).Methods("GET")
 	s.router.HandleFunc("/upload", s.uploadFileHandler).Methods("POST")
+	s.router.HandleFunc("/list", s.listFileHandler).Methods("GET")
 }
 
 func (s *Server) registerMiddlewares() {
