@@ -21,5 +21,4 @@ jobs:
           directory: .
           fail_ci_if_error: true
           files: ./coverage.html
-          name: codecov-umbrella
           verbose: true
