@@ -38,9 +38,6 @@ func (s *Server) registerMiddlewares() {
 
 func (s *Server) ListenAndServe() {
 	// todo: add ready state
-	s.registerHandlers()
-	s.registerMiddlewares()
-	s.handler = s.router
 	s.startServer()
 }
 
@@ -71,6 +68,9 @@ func NewServer(config *Config, logger *zap.Logger) (*Server, error) {
 		config:      config,
 		fileManager: *fileManager,
 	}
+	srv.registerHandlers()
+	srv.registerMiddlewares()
+	srv.handler = srv.router
 
 	return srv, nil
 }

@@ -38,7 +38,6 @@ func TestUploadHandler(t *testing.T) {
 	}
 
 	srv := NewMockServer()
-	handler := http.HandlerFunc(srv.uploadFileHandler)
 
 	for _, c := range cases {
 		file, contentType := mockRandomBytesFile(c.fileSize, c.fileName)
@@ -49,7 +48,7 @@ func TestUploadHandler(t *testing.T) {
 			t.Fatal(err)
 		}
 		rr := httptest.NewRecorder()
-		handler.ServeHTTP(rr, req)
+		srv.uploadFileHandler(rr, req)
 		assert.Equal(rr.Code, c.status, "Hanlder return wrong status code:\nGot %v want %v\nResponse: %s", rr.Code, c.status, rr.Body.String())
 	}
 }

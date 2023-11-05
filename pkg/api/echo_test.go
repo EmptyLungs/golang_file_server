@@ -21,16 +21,13 @@ func TestEchohandler(t *testing.T) {
 	}
 
 	srv := NewMockServer()
-	handler := http.HandlerFunc(srv.echoHandler)
-
 	for _, c := range cases {
 		req, err := http.NewRequest(c.method, c.url, strings.NewReader(c.data))
 		if err != nil {
 			t.Fatal(err)
 		}
 		rr := httptest.NewRecorder()
-		handler.ServeHTTP(rr, req)
-
+		srv.echoHandler(rr, req)
 		assert.Equal(rr.Code, c.status, "hanlder return wrong status code:\ngot %v want %v", rr.Code, c.status)
 	}
 }
