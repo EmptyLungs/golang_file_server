@@ -4,9 +4,11 @@ import (
 	"mime/multipart"
 	"os"
 	"path"
+	"testing"
 	"time"
 
 	"github.com/EmptyLungs/golang_file_server/pkg/files"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
 )
@@ -42,4 +44,9 @@ func NewMockServer(fileManager files.IFileManager) *Server {
 	logger, _ := zap.NewDevelopment()
 	srv, _ := NewServer(config, logger, fileManager)
 	return srv
+}
+
+func Setup(t *testing.T) (*assert.Assertions, *MockFileManager, *Server) {
+	mockfs := new(MockFileManager)
+	return assert.New(t), mockfs, NewMockServer(mockfs)
 }

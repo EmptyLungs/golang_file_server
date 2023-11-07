@@ -49,15 +49,13 @@ func TestListHandler_OK(t *testing.T) {
 		if c.err != nil {
 			var response ErrorResponse
 			if err := json.Unmarshal(rr.Body.Bytes(), &response); err != nil {
-				t.Fatal(err)
-				t.Fail()
+				t.Fatalf(err.Error())
 			}
 			assert.Equal(response.Error, c.err.Error(), "Wrong error message in response")
 		} else {
 			var responseFiles []string
 			if err := json.Unmarshal(rr.Body.Bytes(), &responseFiles); err != nil {
-				t.Fatal(err)
-				t.Fail()
+				t.Fatalf(err.Error())
 			}
 			assert.Equal(responseFiles, c.files, "Wrong list returned in response")
 		}

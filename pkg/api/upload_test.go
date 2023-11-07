@@ -3,13 +3,13 @@ package api
 import (
 	"bytes"
 	"crypto/rand"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func mockRandomBytesFile(size int64, filename string, formField string) (*bytes.Buffer, string) {
@@ -26,8 +26,7 @@ func mockRandomBytesFile(size int64, filename string, formField string) (*bytes.
 	return body, writer.FormDataContentType()
 }
 
-func TestUploadHandler(t *testing.T) {
-	assert := assert.New(t)
+func TestUploadHandler_OK(t *testing.T) {
 	cases := []struct {
 		url       string
 		method    string
@@ -41,10 +40,8 @@ func TestUploadHandler(t *testing.T) {
 		{fileSize: 0, fileName: "empty.txt", status: http.StatusBadRequest},
 		{fileSize: 1, formField: "test", fileName: "empty.txt", status: http.StatusBadRequest},
 	}
-
-	mockfs := new(MockFileManager)
+	assert, mockfs, srv := Setup(t)
 	mockfs.On("Create").Return(nil)
-	srv := NewMockServer(mockfs)
 	for _, c := range cases {
 		file, contentType := mockRandomBytesFile(c.fileSize, c.fileName, c.formField)
 
@@ -52,10 +49,47 @@ func TestUploadHandler(t *testing.T) {
 		req, err := http.NewRequest("POST", "/upload", file)
 		req.Header.Add("Content-Type", contentType)
 		if err != nil {
-			t.Fatal(err)
+			t.Fatalf(err.Error())
 		}
 		rr := httptest.NewRecorder()
 		srv.uploadFileHandler(rr, req)
 		assert.Equal(rr.Code, c.status, "Hanlder return wrong status code")
 	}
+
+}
+
+func TestUploadHandler_FailFS(t *testing.T) {
+	assert, mockfs, srv := Setup(t)
+	mockfs.On("Create").Return(errors.New("Test"))
+
+	file, ct := mockRandomBytesFile(srv.config.UploaderMaxFileSizeMB-1, "test.json", "file")
+	req, err := http.NewRequest("POST", "/upload", file)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	req.Header.Add("Content-Type", ct)
+	rr := httptest.NewRecorder()
+	srv.uploadFileHandler(rr, req)
+	assert.Equal(rr.Code, http.StatusInternalServerError, "Handler returned wrong status")
+	var response ErrorResponse
+	if err := json.Unmarshal(rr.Body.Bytes(), &response); err != nil {
+		t.Fatalf(err.Error())
+	}
+	assert.Equal("Failed to upload file", response.Error, "Wrong error message returned")
+}
+
+func TestUploadHandler_FailForm(t *testing.T) {
+	assert, _, server := Setup(t)
+	req, err := http.NewRequest("POST", "/upload", nil)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	rr := httptest.NewRecorder()
+	server.uploadFileHandler(rr, req)
+	assert.Equal(rr.Code, http.StatusBadRequest, "Handler returned wrong status")
+	var response ErrorResponse
+	if err := json.Unmarshal(rr.Body.Bytes(), &response); err != nil {
+		t.Fatalf(err.Error())
+	}
+	assert.Equal("Failed to parse form data", response.Error, "Wrong error message returned")
 }
