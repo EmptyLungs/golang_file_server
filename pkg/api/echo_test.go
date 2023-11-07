@@ -28,6 +28,6 @@ func TestEchohandler(t *testing.T) {
 		}
 		rr := httptest.NewRecorder()
 		srv.echoHandler(rr, req)
-		assert.Equal(rr.Code, c.status, "hanlder return wrong status code:\ngot %v want %v", rr.Code, c.status)
+		assert.Equal(rr.Code, c.status, "Hanlder return wrong status code")
 	}
 }
