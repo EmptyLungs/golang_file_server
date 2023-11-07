@@ -3,7 +3,6 @@ package api
 import (
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,15 +13,14 @@ func TestEchohandler(t *testing.T) {
 	cases := []struct {
 		url    string
 		method string
-		data   string
 		status int
 	}{
 		{url: "/echo", method: "GET", status: http.StatusOK},
 	}
-
-	srv := NewMockServer()
+	mockfs := new(MockFileManager)
+	srv := NewMockServer(mockfs)
 	for _, c := range cases {
-		req, err := http.NewRequest(c.method, c.url, strings.NewReader(c.data))
+		req, err := http.NewRequest(c.method, c.url, nil)
 		if err != nil {
 			t.Fatal(err)
 		}

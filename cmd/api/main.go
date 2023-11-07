@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/EmptyLungs/golang_file_server/pkg/api"
+	"github.com/EmptyLungs/golang_file_server/pkg/files"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -44,7 +45,12 @@ func main() {
 	if err := viper.Unmarshal(&srvCfg); err != nil {
 		logger.Panic("HTTP Server config unmarshal error", zap.Error(err))
 	}
-	srv, err := api.NewServer(&srvCfg, logger)
+	fileManager, err := files.NewFileManager(srvCfg.UploaderDir, logger)
+	if err != nil {
+		logger.Panic(err.Error())
+	}
+
+	srv, err := api.NewServer(&srvCfg, logger, *fileManager)
 	if err != nil {
 		logger.Panic("server_error", zap.Error(err))
 	}

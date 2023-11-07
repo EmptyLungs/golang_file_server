@@ -22,7 +22,7 @@ type Server struct {
 	logger      *zap.Logger
 	config      *Config
 	handler     http.Handler
-	fileManager files.FileManager
+	fileManager files.IFileManager
 }
 
 func (s *Server) registerHandlers() {
@@ -56,17 +56,13 @@ func (s *Server) startServer() {
 	}
 }
 
-func NewServer(config *Config, logger *zap.Logger) (*Server, error) {
+func NewServer(config *Config, logger *zap.Logger, fileManager files.IFileManager) (*Server, error) {
 	childLogger := logger.With(zap.String("source", "server"))
-	fileManager, err := files.NewFileManager(config.UploaderDir, logger)
-	if err != nil {
-		return nil, err
-	}
 	srv := &Server{
 		router:      mux.NewRouter(),
 		logger:      childLogger,
 		config:      config,
-		fileManager: *fileManager,
+		fileManager: fileManager,
 	}
 	srv.registerHandlers()
 	srv.registerMiddlewares()

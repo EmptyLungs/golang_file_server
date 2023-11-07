@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"crypto/rand"
-	"encoding/json"
 	"fmt"
 	"mime/multipart"
 	"net/http"
@@ -29,7 +28,6 @@ func mockRandomBytesFile(size int64, filename string, formField string) (*bytes.
 
 func TestUploadHandler(t *testing.T) {
 	assert := assert.New(t)
-	var expectedFiles []string
 	cases := []struct {
 		url       string
 		method    string
@@ -38,17 +36,20 @@ func TestUploadHandler(t *testing.T) {
 		formField string
 		status    int
 	}{
-		{url: "/upload", method: "POST", fileSize: 2, fileName: "small.txt", status: http.StatusOK},
-		{url: "/upload", method: "POST", fileSize: 155, fileName: "big.txt", status: http.StatusBadRequest},
-		{url: "/upload", method: "POST", fileSize: 0, fileName: "empty.txt", status: http.StatusBadRequest},
-		{url: "/upload", method: "POST", fileSize: 1, formField: "test", fileName: "empty.txt", status: http.StatusBadRequest},
+		{fileSize: 2, fileName: "small.txt", status: http.StatusOK},
+		{fileSize: 155, fileName: "big.txt", status: http.StatusBadRequest},
+		{fileSize: 0, fileName: "empty.txt", status: http.StatusBadRequest},
+		{fileSize: 1, formField: "test", fileName: "empty.txt", status: http.StatusBadRequest},
 	}
 
-	srv := NewMockServer()
+	mockfs := new(MockFileManager)
+	mockfs.On("Create").Return(nil)
+	srv := NewMockServer(mockfs)
 	for _, c := range cases {
 		file, contentType := mockRandomBytesFile(c.fileSize, c.fileName, c.formField)
+
 		t.Logf(fmt.Sprintf("Uploading file %s with size of %d bytes", c.fileName, len(file.Bytes())))
-		req, err := http.NewRequest(c.method, c.url, file)
+		req, err := http.NewRequest("POST", "/upload", file)
 		req.Header.Add("Content-Type", contentType)
 		if err != nil {
 			t.Fatal(err)
@@ -56,27 +57,5 @@ func TestUploadHandler(t *testing.T) {
 		rr := httptest.NewRecorder()
 		srv.uploadFileHandler(rr, req)
 		assert.Equal(rr.Code, c.status, "Hanlder return wrong status code")
-		if rr.Code == http.StatusOK {
-			expectedFiles = append(expectedFiles, c.fileName)
-		}
 	}
-
-	t.Logf("Requesting list of files after upload")
-
-	req, err := http.NewRequest("GET", "/list", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	rr := httptest.NewRecorder()
-	srv.listFileHandler(rr, req)
-
-	assert.Equal(200, rr.Code, "List handler returned non-200 status code")
-	var responseFiles []string
-	t.Logf(rr.Body.String())
-	err = json.Unmarshal(rr.Body.Bytes(), &responseFiles)
-	if err != nil {
-		t.Fatal(err)
-	}
-	assert.Equal(expectedFiles, responseFiles, "Got unexpected list files response")
 }

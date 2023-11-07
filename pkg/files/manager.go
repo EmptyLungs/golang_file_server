@@ -10,6 +10,12 @@ import (
 	"go.uber.org/zap"
 )
 
+type IFileManager interface {
+	Create(file multipart.File, handler *multipart.FileHeader) error
+	Delete() error
+	List() ([]string, error)
+}
+
 type FileManager struct {
 	workDir string
 	fs      fs.FS
@@ -31,7 +37,7 @@ func NewFileManager(workDir string, logger *zap.Logger) (*FileManager, error) {
 	return fm, nil
 }
 
-func (fm *FileManager) CreateFile(file multipart.File, handler *multipart.FileHeader) error {
+func (fm FileManager) Create(file multipart.File, handler *multipart.FileHeader) error {
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
 		return err
@@ -45,11 +51,11 @@ func (fm *FileManager) CreateFile(file multipart.File, handler *multipart.FileHe
 	return nil
 }
 
-func (fm *FileManager) DeleteFile() error {
+func (fm FileManager) Delete() error {
 	return nil
 }
 
-func (fm *FileManager) ListFiles() ([]string, error) {
+func (fm FileManager) List() ([]string, error) {
 	var fileNames []string
 	files, err := fs.ReadDir(fm.fs, ".")
 	if err != nil {
