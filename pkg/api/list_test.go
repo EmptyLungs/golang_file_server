@@ -43,7 +43,7 @@ func TestListHandler_OK(t *testing.T) {
 			t.Fatal(err)
 		}
 		rr := httptest.NewRecorder()
-		srv.listFileHandler(rr, req)
+		srv.handler.ServeHTTP(rr, req)
 		t.Logf(rr.Body.String())
 		assert.Equal(rr.Code, c.statusCode, "Handler returned wrong status")
 		if c.err != nil {

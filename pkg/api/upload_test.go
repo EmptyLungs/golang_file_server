@@ -52,7 +52,7 @@ func TestUploadHandler_OK(t *testing.T) {
 			t.Fatalf(err.Error())
 		}
 		rr := httptest.NewRecorder()
-		srv.uploadFileHandler(rr, req)
+		srv.handler.ServeHTTP(rr, req)
 		assert.Equal(rr.Code, c.status, "Hanlder return wrong status code")
 	}
 
@@ -69,7 +69,7 @@ func TestUploadHandler_FailFS(t *testing.T) {
 	}
 	req.Header.Add("Content-Type", ct)
 	rr := httptest.NewRecorder()
-	srv.uploadFileHandler(rr, req)
+	srv.handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusInternalServerError, "Handler returned wrong status")
 	var response ErrorResponse
 	if err := json.Unmarshal(rr.Body.Bytes(), &response); err != nil {
@@ -79,13 +79,13 @@ func TestUploadHandler_FailFS(t *testing.T) {
 }
 
 func TestUploadHandler_FailForm(t *testing.T) {
-	assert, _, server := Setup(t)
+	assert, _, srv := Setup(t)
 	req, err := http.NewRequest("POST", "/upload", nil)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 	rr := httptest.NewRecorder()
-	server.uploadFileHandler(rr, req)
+	srv.handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusBadRequest, "Handler returned wrong status")
 	var response ErrorResponse
 	if err := json.Unmarshal(rr.Body.Bytes(), &response); err != nil {

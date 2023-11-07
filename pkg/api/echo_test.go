@@ -4,12 +4,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestEchohandler(t *testing.T) {
-	assert := assert.New(t)
+	assert, _, srv := Setup(t)
 	cases := []struct {
 		url    string
 		method string
@@ -17,15 +15,14 @@ func TestEchohandler(t *testing.T) {
 	}{
 		{url: "/echo", method: "GET", status: http.StatusOK},
 	}
-	mockfs := new(MockFileManager)
-	srv := NewMockServer(mockfs)
 	for _, c := range cases {
 		req, err := http.NewRequest(c.method, c.url, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
 		rr := httptest.NewRecorder()
-		srv.echoHandler(rr, req)
+		// srv.echoHandler(rr, req)
+		srv.handler.ServeHTTP(rr, req)
 		assert.Equal(rr.Code, c.status, "Hanlder return wrong status code")
 	}
 }

@@ -2,8 +2,6 @@ package api
 
 import (
 	"mime/multipart"
-	"os"
-	"path"
 	"testing"
 	"time"
 
@@ -31,14 +29,10 @@ func (m *MockFileManager) List() ([]string, error) {
 }
 
 func NewMockServer(fileManager files.IFileManager) *Server {
-	dir, _ := os.Getwd()
-	testDataDir := path.Join(dir, "test-data")
-	os.RemoveAll(testDataDir)
 	config := &Config{
 		Host:                  "",
 		Port:                  "8080",
 		HttpServerTimeout:     5 * time.Second,
-		UploaderDir:           testDataDir,
 		UploaderMaxFileSizeMB: 5,
 	}
 	logger, _ := zap.NewDevelopment()
