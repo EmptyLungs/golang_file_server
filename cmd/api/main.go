@@ -17,7 +17,7 @@ func main() {
 	fs.String("host", "127.0.0.1", "Host to bind HTTP server to")
 	fs.Int("port", 8080, "Port to bind HTTP server to")
 	fs.String("upload-dir", "./data", "Files directory")
-	fs.Int64("UploaderMaxFileSizeMB", 50, "Upload file size limit")
+	fs.Int64("upload-max-file-size", 50, "Upload file size limit")
 	fs.String("level", "info", "Log level")
 	fs.Duration("http-server-timeout", 30*time.Second, "server read and write timeout duration")
 

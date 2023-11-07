@@ -1,8 +1,8 @@
 package files
 
 import (
-	"errors"
 	"io"
+	"io/fs"
 	"mime/multipart"
 	"os"
 	"path"
@@ -12,6 +12,7 @@ import (
 
 type FileManager struct {
 	workDir string
+	fs      fs.FS
 	logger  *zap.Logger
 }
 
@@ -21,20 +22,16 @@ func NewFileManager(workDir string, logger *zap.Logger) (*FileManager, error) {
 		return nil, err
 	}
 	childLogger := logger.With(zap.String("source", "file_uploader"))
+	fs := os.DirFS(workDir)
 	fm := &FileManager{
 		workDir: workDir,
+		fs:      fs,
 		logger:  childLogger,
 	}
 	return fm, nil
 }
 
 func (fm *FileManager) CreateFile(file multipart.File, handler *multipart.FileHeader) error {
-	if handler.Size == 0 {
-		return errors.New("file is empty")
-	}
-	if handler.Size > 5*1024*1024 {
-		return errors.New("file is too big")
-	}
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
 		return err
@@ -54,7 +51,7 @@ func (fm *FileManager) DeleteFile() error {
 
 func (fm *FileManager) ListFiles() ([]string, error) {
 	var fileNames []string
-	files, err := os.ReadDir(fm.workDir)
+	files, err := fs.ReadDir(fm.fs, ".")
 	if err != nil {
 		return nil, err
 	}

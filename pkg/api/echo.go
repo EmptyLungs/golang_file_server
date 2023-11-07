@@ -5,5 +5,8 @@ import (
 )
 
 func (s *Server) echoHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+	resp := struct {
+		Message string
+	}{Message: "Hello!"}
+	s.JsonResponse(w, r, http.StatusOK, resp)
 }
