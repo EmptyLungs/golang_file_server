@@ -1,7 +1,7 @@
 package api
 
 import (
-	"mime/multipart"
+	"io"
 	"testing"
 	"time"
 
@@ -15,7 +15,7 @@ type MockFileManager struct {
 	mock.Mock
 }
 
-func (m *MockFileManager) Create(file multipart.File, handler *multipart.FileHeader) error {
+func (m *MockFileManager) Create(file io.Reader, filename string) error {
 	args := m.Called()
 	return args.Error(0)
 }

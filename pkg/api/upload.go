@@ -29,7 +29,7 @@ func (s *Server) uploadFileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = s.fileManager.Create(file, handler)
+	err = s.fileManager.Create(file, handler.Filename)
 	if err != nil {
 		s.JsonError(w, r, http.StatusInternalServerError, "Failed to upload file")
 		s.logger.Error("Failed to upload file", zap.Error(err))

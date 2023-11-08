@@ -3,7 +3,6 @@ package files
 import (
 	"io"
 	"io/fs"
-	"mime/multipart"
 	"os"
 	"path"
 
@@ -11,7 +10,7 @@ import (
 )
 
 type IFileManager interface {
-	Create(file multipart.File, handler *multipart.FileHeader) error
+	Create(file io.Reader, filename string) error
 	Delete() error
 	List() ([]string, error)
 }
@@ -37,17 +36,17 @@ func NewFileManager(workDir string, logger *zap.Logger) (*FileManager, error) {
 	return fm, nil
 }
 
-func (fm FileManager) Create(file multipart.File, handler *multipart.FileHeader) error {
+func (fm FileManager) Create(file io.Reader, filename string) error {
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
 		return err
 	}
-	f, err := os.Create(path.Join(fm.workDir, handler.Filename))
+	f, err := os.Create(path.Join(fm.workDir, filename))
 	if err != nil {
 		return err
 	}
 	f.Write(fileBytes)
-	fm.logger.Info("upload", zap.String("filename", handler.Filename), zap.Int64("size_bytes", handler.Size))
+	fm.logger.Info("upload", zap.String("filename", filename), zap.Int("size_bytes", len(fileBytes)))
 	return nil
 }
 
