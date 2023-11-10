@@ -50,8 +50,7 @@ func TestDeleteHandlerEmptyBody(t *testing.T) {
 }
 
 func TestDeleteHandlerWrongJsonPayload(t *testing.T) {
-	assert, mfs, srv := Setup(t)
-	mfs.On("Delete").Return(nil)
+	assert, _, srv := Setup(t)
 	var badPayload struct {
 		Test string `json:"test"`
 	}
@@ -77,4 +76,25 @@ func TestDeleteHandlerWrongJsonPayload(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 	assert.Equal("Missing filename in request body", response.Error, "Wrong error message")
+}
+func TestDeleteHandlerBadJsonPayload(t *testing.T) {
+	assert, _, srv := Setup(t)
+	badJsonData := []byte("\n\n\nasdasdasddas")
+	req, err := http.NewRequest("POST", "/delete", bytes.NewBuffer(badJsonData))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	// srv.echoHandler(rr, req)
+	srv.handler.ServeHTTP(rr, req)
+	assert.Equal(rr.Code, http.StatusBadRequest, "Hanlder returned wrong status code")
+	var response ErrorResponse
+	body, err := io.ReadAll(rr.Body)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err = json.Unmarshal(body, &response); err != nil {
+		t.Fatalf(err.Error())
+	}
+	assert.Equal("Failed to parse request body", response.Error, "Wrong error message")
 }
