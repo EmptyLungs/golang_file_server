@@ -17,6 +17,7 @@ func (fm FileManager) Create(file io.Reader, filename string) error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 	if _, err = f.Write(fileBytes); err != nil {
 		return err
 	}
