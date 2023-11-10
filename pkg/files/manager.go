@@ -21,13 +21,12 @@ type FileManager struct {
 	logger  *zap.Logger
 }
 
-func NewFileManager(workDir string, logger *zap.Logger) (*FileManager, error) {
+func NewFileManager(workDir string, fs fs.FS, logger *zap.Logger) (*FileManager, error) {
 	err := checkDirExists(workDir)
 	if err != nil {
 		return nil, err
 	}
 	childLogger := logger.With(zap.String("source", "file_uploader"))
-	fs := os.DirFS(workDir)
 	fm := &FileManager{
 		workDir: workDir,
 		fs:      fs,

@@ -45,7 +45,8 @@ func main() {
 	if err := viper.Unmarshal(&srvCfg); err != nil {
 		logger.Panic("HTTP Server config unmarshal error", zap.Error(err))
 	}
-	fileManager, err := files.NewFileManager(srvCfg.UploaderDir, logger)
+	dirFs := os.DirFS(srvCfg.UploaderDir)
+	fileManager, err := files.NewFileManager(srvCfg.UploaderDir, dirFs, logger)
 	if err != nil {
 		logger.Panic(err.Error())
 	}
