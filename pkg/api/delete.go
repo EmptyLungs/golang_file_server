@@ -25,21 +25,16 @@ func (s *Server) deleteFileHandler(w http.ResponseWriter, r *http.Request) {
 		s.JsonError(w, r, http.StatusBadRequest, "Failed to parse request body")
 		return
 	}
+	if payload.Filename == "" {
+		s.JsonError(w, r, http.StatusBadRequest, "Missing filename in request body")
+		return
+	}
 	if err := s.fileManager.Delete(payload.Filename); err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			s.JsonResponse(w, r, http.StatusNotFound, nil)
 			return
 		}
 		s.JsonError(w, r, http.StatusInternalServerError, "Failed to delete file")
-		return
-	}
-	if payload.Filename == "" {
-		s.JsonError(w, r, http.StatusBadRequest, "Missing filename in request body")
-		return
-	}
-	s.logger.Info("asdsadadssad", zap.String("path", payload.Filename))
-	if err := s.fileManager.Delete(payload.Filename); err != nil {
-		s.JsonError(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
 	s.JsonResponse(w, r, http.StatusNoContent, nil)

@@ -10,6 +10,24 @@ import (
 	"testing"
 )
 
+func TestDeleteHandler(t *testing.T) {
+	assert, mfs, srv := Setup(t)
+	mfs.On("Delete").Return(nil).Once()
+	payload := Payload{Filename: "test.txt"}
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	req, err := http.NewRequest("POST", "/delete", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	srv.handler.ServeHTTP(rr, req)
+	assert.Equal(http.StatusNoContent, rr.Code, "Hanlder return wrong status code")
+}
+
 func TestDeleteHandlerNotExists(t *testing.T) {
 	assert, mfs, srv := Setup(t)
 	mfs.On("Delete").Return(fs.ErrNotExist).Once()
