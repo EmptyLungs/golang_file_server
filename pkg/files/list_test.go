@@ -26,7 +26,7 @@ func (m MockFSWrapper) Open(name string) (fs.File, error) {
 	return m.fs.Open(name)
 }
 
-func TestFileManagerUpload(t *testing.T) {
+func TestFileManagerList(t *testing.T) {
 	assert := assert.New(t)
 	mfs := MockFSWrapper{
 		err: nil,
@@ -44,7 +44,7 @@ func TestFileManagerUpload(t *testing.T) {
 	assert.Nil(err)
 	assert.ElementsMatch([]string{"test.txt", "pleaseignore.json"}, files)
 }
-func TestFileManagerUpload_Fail(t *testing.T) {
+func TestFileManagerList_Fail(t *testing.T) {
 	assert := assert.New(t)
 
 	errMsg := "Failed to list working directory"
