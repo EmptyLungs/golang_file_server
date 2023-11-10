@@ -52,10 +52,7 @@ func TestFileManagerList_Fail(t *testing.T) {
 		err: errors.New(errMsg),
 		fs:  fstest.MapFS{},
 	}
-	logger, err := zap.NewDevelopment()
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
+	logger := zap.NewNop()
 	fileManager := FileManager{fs: mfs, workDir: ".", logger: logger}
 	files, err := fileManager.List()
 	t.Logf(err.Error())

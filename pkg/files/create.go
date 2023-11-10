@@ -17,7 +17,9 @@ func (fm FileManager) Create(file io.Reader, filename string) error {
 	if err != nil {
 		return err
 	}
-	f.Write(fileBytes)
+	if _, err = f.Write(fileBytes); err != nil {
+		return err
+	}
 	fm.logger.Info("upload", zap.String("filename", filename), zap.Int("size_bytes", len(fileBytes)))
 	return nil
 }
