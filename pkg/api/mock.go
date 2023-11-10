@@ -19,7 +19,7 @@ func (m *MockFileManager) Create(file io.Reader, filename string) error {
 	args := m.Called()
 	return args.Error(0)
 }
-func (m *MockFileManager) Delete() error {
+func (m *MockFileManager) Delete(filename string) error {
 	args := m.Called()
 	return args.Error(0)
 }

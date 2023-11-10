@@ -9,7 +9,7 @@ import (
 
 type IFileManager interface {
 	Create(file io.Reader, filename string) error
-	Delete() error
+	Delete(filename string) error
 	List() ([]string, error)
 }
 
@@ -31,8 +31,4 @@ func NewFileManager(workDir string, fs fs.FS, logger *zap.Logger) (*FileManager,
 		logger:  childLogger,
 	}
 	return fm, nil
-}
-
-func (fm FileManager) Delete() error {
-	return nil
 }
