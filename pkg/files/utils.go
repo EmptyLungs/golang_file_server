@@ -1,6 +1,8 @@
 package files
 
-import "os"
+import (
+	"os"
+)
 
 func checkDirExists(path string) error {
 	_, err := os.Stat(path)
