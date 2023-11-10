@@ -55,7 +55,6 @@ func TestFileManagerList_Fail(t *testing.T) {
 	logger := zap.NewNop()
 	fileManager := FileManager{fs: mfs, workDir: ".", logger: logger}
 	files, err := fileManager.List()
-	t.Logf(err.Error())
 	assert.Nil(files)
 	assert.Equal(errMsg, err.Error())
 }

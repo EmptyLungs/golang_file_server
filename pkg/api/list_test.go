@@ -44,7 +44,6 @@ func TestListHandler_OK(t *testing.T) {
 		}
 		rr := httptest.NewRecorder()
 		srv.handler.ServeHTTP(rr, req)
-		t.Logf(rr.Body.String())
 		assert.Equal(rr.Code, c.statusCode, "Handler returned wrong status")
 		if c.err != nil {
 			var response ErrorResponse

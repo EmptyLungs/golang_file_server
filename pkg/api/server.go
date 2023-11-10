@@ -29,6 +29,7 @@ func (s *Server) registerHandlers() {
 	s.router.HandleFunc("/echo", s.echoHandler).Methods("GET")
 	s.router.HandleFunc("/upload", s.uploadFileHandler).Methods("POST")
 	s.router.HandleFunc("/list", s.listFileHandler).Methods("GET")
+	s.router.HandleFunc("/delete", s.deleteFileHandler).Methods("POST")
 }
 
 func (s *Server) registerMiddlewares() {
