@@ -35,7 +35,7 @@ func NewMockServer(fileManager files.IFileManager) *Server {
 		HttpServerTimeout:     5 * time.Second,
 		UploaderMaxFileSizeMB: 5,
 	}
-	logger, _ := zap.NewDevelopment()
+	logger := zap.NewNop()
 	srv, _ := NewServer(config, logger, fileManager)
 	return srv
 }
