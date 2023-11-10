@@ -20,6 +20,7 @@ type LogEntry struct {
 	UserAgent string  `json:"user-agent"`
 	Duration  float64 `json:"duration"`
 	Source    string  `json:"source"`
+	Code      int     `json:"code"`
 }
 
 type TestingLogSink struct {
