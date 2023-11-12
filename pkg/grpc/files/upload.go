@@ -2,11 +2,15 @@ package grpc
 
 import (
 	"bytes"
-	"errors"
 	"io"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (f *FileServer) Upload(stream FileService_UploadServer) error {
+	// todo implement chunk-by-chunk write
+	// to prevent accumulating all file in memory
 	var fileSize uint32
 	fileSize = 0
 	var fileData []byte
@@ -17,7 +21,7 @@ func (f *FileServer) Upload(stream FileService_UploadServer) error {
 			break
 		}
 		if err != nil {
-			return errors.New("error")
+			return status.Error(codes.Internal, "faield to read stream")
 		}
 		if req.GetFilename() != "" {
 			fileName = req.GetFilename()
@@ -28,10 +32,10 @@ func (f *FileServer) Upload(stream FileService_UploadServer) error {
 	}
 	buffer := bytes.NewBuffer(fileData)
 	if fileName == "" {
-		return errors.New("missing filename")
+		return status.Error(codes.InvalidArgument, "missing file name")
 	}
 	if err := f.fm.Create(buffer, fileName); err != nil {
-		return err
+		return status.Error(codes.Internal, err.Error())
 	}
-	return stream.SendAndClose(&UploadResponse{Message: "ok"})
+	return stream.SendAndClose(&UploadResponse{Message: "ok", Filename: fileName, Filesize: fileSize})
 }
