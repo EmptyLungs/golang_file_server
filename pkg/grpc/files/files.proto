@@ -5,6 +5,15 @@ option go_package = "./grpc";
 
 service FileService {
     rpc Upload (stream UploadRequest) returns (UploadResponse);
+    rpc Delete (DeleteRequest) returns (DeleteResponse);
+}
+
+message DeleteRequest {
+    string filename = 1;
+}
+
+message DeleteResponse {
+    string message = 1;
 }
 
 message UploadRequest {
