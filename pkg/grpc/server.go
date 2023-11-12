@@ -9,6 +9,8 @@ import (
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
+
+	echo "github.com/EmptyLungs/golang_file_server/pkg/grpc/echo"
 )
 
 type Server struct {
@@ -41,8 +43,8 @@ func (s *Server) ListenAndServe() *grpc.Server {
 	reflection.Register(srv)
 	grpc_health_v1.RegisterHealthServer(srv, server)
 	server.SetServingStatus(s.config.ServiceName, grpc_health_v1.HealthCheckResponse_SERVING)
-	echoService := EchoService{logger: s.logger}
-	RegisterEchoServiceServer(srv, echoService)
+	echoService := echo.NewEchoService(s.logger)
+	echo.RegisterEchoServiceServer(srv, echoService)
 	go func() {
 		if err := srv.Serve(listener); err != nil {
 			s.logger.Fatal("Failed to start grpc server", zap.Error(err))
