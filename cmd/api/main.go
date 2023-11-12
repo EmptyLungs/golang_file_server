@@ -8,6 +8,7 @@ import (
 
 	"github.com/EmptyLungs/golang_file_server/pkg/api"
 	"github.com/EmptyLungs/golang_file_server/pkg/files"
+	"github.com/EmptyLungs/golang_file_server/pkg/grpc"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -21,6 +22,8 @@ func main() {
 	fs.Int64("upload-max-file-size", 50, "Upload file size limit")
 	fs.String("level", "info", "Log level")
 	fs.Duration("http-server-timeout", 30*time.Second, "server read and write timeout duration")
+	fs.Int("grpc-port", 0, "gRPC port")
+	fs.String("grpc-service-name", "gofs", "gRPC service name")
 
 	err := fs.Parse(os.Args[1:])
 	switch {
@@ -51,6 +54,15 @@ func main() {
 		logger.Panic(err.Error())
 	}
 
+	var grpcCfg grpc.Config
+	if err := viper.Unmarshal(&grpcCfg); err != nil {
+		logger.Panic("gRPC Server config unmarshal error", zap.Error(err))
+	}
+
+	if grpcCfg.Port > 0 {
+		grpcSrv, _ := grpc.NewServer(&grpcCfg, logger)
+		grpcSrv.ListenAndServe()
+	}
 	srv, err := api.NewServer(&srvCfg, logger, *fileManager)
 	if err != nil {
 		logger.Panic("server_error", zap.Error(err))
