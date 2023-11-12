@@ -36,6 +36,7 @@ func TestUploadHandler_OK(t *testing.T) {
 		status    int
 	}{
 		{fileSize: 2, fileName: "small.txt", status: http.StatusOK},
+		{fileSize: 2, fileName: "/root/small.txt", status: http.StatusOK},
 		{fileSize: 155, fileName: "big.txt", status: http.StatusBadRequest},
 		{fileSize: 0, fileName: "empty.txt", status: http.StatusBadRequest},
 		{fileSize: 1, formField: "test", fileName: "empty.txt", status: http.StatusBadRequest},
@@ -55,7 +56,6 @@ func TestUploadHandler_OK(t *testing.T) {
 		srv.handler.ServeHTTP(rr, req)
 		assert.Equal(rr.Code, c.status, "Hanlder return wrong status code")
 	}
-
 }
 
 func TestUploadHandler_FailFS(t *testing.T) {

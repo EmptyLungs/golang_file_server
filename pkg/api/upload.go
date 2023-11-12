@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
 
 	"go.uber.org/zap"
 )
@@ -28,8 +29,8 @@ func (s *Server) uploadFileHandler(w http.ResponseWriter, r *http.Request) {
 		s.JsonResponse(w, r, http.StatusBadRequest, "Empty file")
 		return
 	}
-
-	err = s.fileManager.Create(file, handler.Filename)
+	filename := filepath.Base(handler.Filename)
+	err = s.fileManager.Create(file, filename)
 	if err != nil {
 		s.JsonError(w, r, http.StatusInternalServerError, "Failed to upload file")
 		s.logger.Error("Failed to upload file", zap.Error(err))
