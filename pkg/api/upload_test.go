@@ -28,8 +28,6 @@ func mockRandomBytesFile(size int64, filename string, formField string) (*bytes.
 
 func TestUploadHandler_OK(t *testing.T) {
 	cases := []struct {
-		url       string
-		method    string
 		fileSize  int64
 		fileName  string
 		formField string
