@@ -32,7 +32,7 @@ func (m *MockFileManager) List() ([]string, error) {
 func NewMockServer() (FileServiceClient, *MockFileManager, func()) {
 	logger, _ := zap.NewDevelopment()
 	fm := &MockFileManager{}
-	server := &FileServer{logger: logger, fm: fm}
+	server := NewService(logger, fm)
 	lis := bufconn.Listen(1024 * 1024)
 
 	srv := grpc.NewServer()
@@ -49,6 +49,7 @@ func NewMockServer() (FileServiceClient, *MockFileManager, func()) {
 			logger.Fatal(err.Error())
 		}
 		srv.Stop()
+		logger.Sync()
 	}
 	dialer := func(context.Context, string) (net.Conn, error) {
 		return lis.Dial()
