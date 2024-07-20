@@ -24,6 +24,7 @@ func main() {
 	fs.Duration("http-server-timeout", 30*time.Second, "server read and write timeout duration")
 	fs.Int("grpc-port", 0, "gRPC port")
 	fs.String("grpc-service-name", "gofs", "gRPC service name")
+	fs.String("auth-token", "", "Authenication token for both REST and gRPC api")
 
 	err := fs.Parse(os.Args[1:])
 	switch {

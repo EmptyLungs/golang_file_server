@@ -39,6 +39,7 @@ func TestListHandler_OK(t *testing.T) {
 	for _, c := range cases {
 		mockfs.On("List").Return(c.files, c.err).Once()
 		req, err := http.NewRequest("GET", "/list", nil)
+		req.Header.Add("Authorization", "Bearer test")
 		if err != nil {
 			t.Fatal(err)
 		}

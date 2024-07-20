@@ -17,6 +17,7 @@ func TestEchohandler(t *testing.T) {
 	}
 	for _, c := range cases {
 		req, err := http.NewRequest(c.method, c.url, nil)
+		req.Header.Add("Authorization", "Bearer test")
 		if err != nil {
 			t.Fatal(err)
 		}

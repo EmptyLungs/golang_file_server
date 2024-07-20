@@ -15,6 +15,7 @@ type Config struct {
 	HttpServerTimeout     time.Duration `mapstructure:"http-server-timeout"`
 	UploaderDir           string        `mapstructure:"upload-dir"`
 	UploaderMaxFileSizeMB int64         `mapstructure:"upload-max-file-size"`
+	AuthToken             string        `mapstructure:"auth-token"`
 }
 
 type Server struct {
@@ -34,7 +35,9 @@ func (s *Server) registerHandlers() {
 
 func (s *Server) registerMiddlewares() {
 	httpLogger := NewLoggingMiddleware(s.logger)
+	authMiddleware := NewAuthMiddleware(s.config.AuthToken)
 	s.router.Use(httpLogger.Handler)
+	s.router.Use(authMiddleware.Handler)
 }
 
 func (s *Server) ListenAndServe() {

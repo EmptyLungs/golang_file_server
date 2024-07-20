@@ -1,18 +1,23 @@
 package grpc
 
 import (
+	"context"
 	"fmt"
 	"net"
-
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/health"
-	"google.golang.org/grpc/health/grpc_health_v1"
-	"google.golang.org/grpc/reflection"
 
 	files "github.com/EmptyLungs/golang_file_server/pkg/files"
 	grpc_echo "github.com/EmptyLungs/golang_file_server/pkg/grpc/echo"
 	grpc_files "github.com/EmptyLungs/golang_file_server/pkg/grpc/files"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 )
 
 type Server struct {
@@ -24,6 +29,7 @@ type Server struct {
 type Config struct {
 	Port        int    `mapstructure:"grpc-port"`
 	ServiceName string `mapstructure:"grpc-service-name"`
+	AuthToken   string `mapstructure:"auth-token"`
 }
 
 func NewServer(config *Config, logger *zap.Logger, fileManager files.IFileManager) (*Server, error) {
@@ -36,13 +42,33 @@ func NewServer(config *Config, logger *zap.Logger, fileManager files.IFileManage
 	return srv, nil
 }
 
-func (s *Server) ListenAndServe() *grpc.Server {
+func (s *Server) ListenAndServe() (*grpc.Server, func()) {
+	authFn := func(ctx context.Context) (context.Context, error) {
+		// disable auth if token in not set
+		if s.config.AuthToken == "" {
+			return ctx, nil
+		}
+		token, err := auth.AuthFromMD(ctx, "bearer")
+		if err != nil {
+			s.logger.Error(err.Error())
+			return nil, status.Error(codes.Internal, "Cannot parse bearer auth")
+		}
+		s.logger.Info(token)
+		return ctx, nil
+	}
+	allButHealthZ := func(ctx context.Context, callMeta interceptors.CallMeta) bool {
+		return grpc_health_v1.Health_ServiceDesc.ServiceName != callMeta.Service
+	}
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", s.config.Port))
 	if err != nil {
 		s.logger.Fatal("Failed to start TCP listener", zap.Error(err))
 	}
 	s.logger.Info("Starting grpc server")
-	srv := grpc.NewServer()
+	srv := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			selector.UnaryServerInterceptor(auth.UnaryServerInterceptor(authFn), selector.MatchFunc(allButHealthZ)),
+		),
+	)
 	server := health.NewServer()
 	reflection.Register(srv)
 
@@ -59,5 +85,11 @@ func (s *Server) ListenAndServe() *grpc.Server {
 			s.logger.Fatal("Failed to start grpc server", zap.Error(err))
 		}
 	}()
-	return srv
+	closer := func() {
+		if err := listener.Close(); err != nil {
+			s.logger.Fatal(err.Error())
+		}
+		srv.GracefulStop()
+	}
+	return srv, closer
 }

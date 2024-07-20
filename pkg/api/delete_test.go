@@ -19,10 +19,11 @@ func TestDeleteHandler(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 	req, err := http.NewRequest("POST", "/delete", bytes.NewBuffer(jsonData))
-	req.Header.Set("Content-Type", "application/json")
 	if err != nil {
 		t.Fatal(err)
 	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer test")
 	rr := httptest.NewRecorder()
 	srv.handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusNoContent, rr.Code, "Hanlder return wrong status code")
@@ -37,10 +38,11 @@ func TestDeleteHandlerNotExists(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 	req, err := http.NewRequest("POST", "/delete", bytes.NewBuffer(jsonData))
-	req.Header.Set("Content-Type", "application/json")
 	if err != nil {
 		t.Fatal(err)
 	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer test")
 	rr := httptest.NewRecorder()
 	srv.handler.ServeHTTP(rr, req)
 	assert.Equal(http.StatusNotFound, rr.Code, "Hanlder return wrong status code")
@@ -52,6 +54,7 @@ func TestDeleteHandlerEmptyBody(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	req.Header.Add("Authorization", "Bearer test")
 	rr := httptest.NewRecorder()
 	// srv.echoHandler(rr, req)
 	srv.handler.ServeHTTP(rr, req)
@@ -81,6 +84,7 @@ func TestDeleteHandlerWrongJsonPayload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	req.Header.Add("Authorization", "Bearer test")
 	rr := httptest.NewRecorder()
 	// srv.echoHandler(rr, req)
 	srv.handler.ServeHTTP(rr, req)
@@ -102,6 +106,7 @@ func TestDeleteHandlerBadJsonPayload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	req.Header.Add("Authorization", "Bearer test")
 	rr := httptest.NewRecorder()
 	// srv.echoHandler(rr, req)
 	srv.handler.ServeHTTP(rr, req)

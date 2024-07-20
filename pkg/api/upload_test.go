@@ -47,6 +47,7 @@ func TestUploadHandler_OK(t *testing.T) {
 		t.Logf(fmt.Sprintf("Uploading file %s with size of %d bytes", c.fileName, len(file.Bytes())))
 		req, err := http.NewRequest("POST", "/upload", file)
 		req.Header.Add("Content-Type", contentType)
+		req.Header.Add("Authorization", "Bearer test")
 		if err != nil {
 			t.Fatalf(err.Error())
 		}
@@ -66,6 +67,7 @@ func TestUploadHandler_FailFS(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 	req.Header.Add("Content-Type", ct)
+	req.Header.Add("Authorization", "Bearer test")
 	rr := httptest.NewRecorder()
 	srv.handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusInternalServerError, "Handler returned wrong status")
@@ -82,6 +84,7 @@ func TestUploadHandler_FailForm(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
+	req.Header.Add("Authorization", "Bearer test")
 	rr := httptest.NewRecorder()
 	srv.handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusBadRequest, "Handler returned wrong status")
