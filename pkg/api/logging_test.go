@@ -41,12 +41,11 @@ func TestLoggingMiddleware(t *testing.T) {
 		zap.InfoLevel,
 	)
 	logger := zap.New(core)
-	srv, _ := NewServer(&Config{AuthToken: "test"}, logger, new(MockFileManager))
+	srv, _ := NewServer(&Config{}, logger, new(MockFileManager))
 	req, err := http.NewRequest("GET", "/echo", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	req.Header.Add("Authorization", "Bearer test")
 	rr := httptest.NewRecorder()
 	srv.handler.ServeHTTP(rr, req)
 	assert.Equal(rr.Code, http.StatusOK, "Hanlder return wrong status code")

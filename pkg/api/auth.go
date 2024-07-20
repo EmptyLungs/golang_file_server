@@ -16,6 +16,10 @@ func NewAuthMiddleware(token string) *AuthMiddleware {
 
 func (m *AuthMiddleware) Handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if m.token == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
 		token := r.Header.Get("Authorization")
 
 		if token == "" {
