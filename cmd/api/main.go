@@ -62,7 +62,7 @@ func main() {
 
 	if grpcCfg.Port > 0 {
 		grpcSrv, _ := grpc.NewServer(&grpcCfg, logger, *fileManager)
-		grpcSrv.ListenAndServe()
+		_, closer := grpcSrv.ListenAndServe()
 	}
 	srv, err := api.NewServer(&srvCfg, logger, *fileManager)
 	if err != nil {

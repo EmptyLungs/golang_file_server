@@ -3,7 +3,7 @@ package files
 import (
 	"io"
 	"os"
-	"path"
+	"path/filepath"
 
 	"go.uber.org/zap"
 )
@@ -13,7 +13,7 @@ func (fm FileManager) Create(file io.Reader, filename string) error {
 	if err != nil {
 		return err
 	}
-	f, err := os.Create(path.Join(fm.workDir, filename))
+	f, err := os.Create(filepath.Join(fm.workDir, filename))
 	if err != nil {
 		return err
 	}
